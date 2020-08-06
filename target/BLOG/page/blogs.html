@@ -1,0 +1,774 @@
+<!--博客查看主页面-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>MyBlogs</title>
+    <link rel="shortcut icon" href="../img/favicon.png"/>
+    <!-- Bootstrap -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <!--自定义调整样式 -->
+    <link href="../css/mycss.css" rel="stylesheet">
+    <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
+    <script src="../js/jquery-3.5.1.min.js"></script>
+    <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+    <script src="../js/bootstrap.min.js"></script>
+    <!--cookie插件-->
+    <script src="../js/jquery.cookie.js"></script>
+    <!--自定义js-->
+    <script src="../js/myjs.js"></script>
+    <script>
+        //a代表的是账号格式正确，并且不存在，b代表的是用户名格式正确，并且不存在，只有这两个条件同时达到才提交到后台
+        let a,b
+        //获取cookie信息（是否登录的验证）
+        let cookieLogin=$.cookie("login");
+        let cookieAccount=$.cookie("account");
+        //当前页码
+        let pageNow;
+        //页面展示状态 三种：（博文总览，分类查看，搜索查看），主要用于分页按钮的控制，什么这个值对应着调用什么服务
+        let pageStatus;
+        //搜索的值
+        let exploreValue;
+        //加载函数（也就是说页面刷新就会调用），进行事件绑定以及初始化
+        $(function () {
+            //博客展示表格
+            let blogTable=$("#blogShow");
+            //两个模态框
+            let model1=$("#model1");
+            let model2=$("#model2");
+            //页码
+            let pageNumber=$("#pageNumber");
+            $("#faceDropDown").hide();
+            //先显示模态框
+            model1.show();
+            model2.show();
+            //如果用户已经登录，进行头像的设置
+            if(cookieLogin != null && cookieLogin !== ''){
+                $.post("../GetUserInfServlet",{account:cookieAccount},function (data) {
+                    // $("#mySeting").prop("href","myseting.html?"+"login="+cookieLogin+"&account="+cookieAccount);
+                    $("img").prop("src",data.face);
+                    //隐藏模态框
+                    model1.hide();
+                    model2.hide();
+                    $("#faceDropDown").show();
+                },"json");
+            }
+            //向服务器请求当前主页面的博文信息（初始化页面，博文总览）
+            $.post("../MainPageShowServlet",{currentPage:"1",pageSize:"5"},function (data) {
+                //当前页码
+                pageNow=1;
+                pageStatus="Main";
+                //获取文章集合（json格式）
+                let dataList=data.dataList;
+                //清空列表原有数据
+                blogTable.empty();
+                //添加表格体
+                blogTable.append('<tbody></tbody>');
+                let table=$("#blogShow tbody");
+                //添加首行列名
+                table.append('<tr>'+
+                    '<td>#</td>'+
+                    '<td>博文名字</td>'+
+                    '<td>博文分类</td>'+
+                    '<td>博文作者</td>'+
+                    '</tr>'
+                )
+                //下面是博文信息的添加
+                //循环添加博文信息行
+                for(let i=0;i<dataList.length;i++){
+                    //先添加行标签并且设置id
+                    table.append('<tr id='+dataList[i].id+'>'+'</tr>');
+                    //动态获取行对象
+                    let row=$("#"+dataList[i].id);
+                    //第一列根据当前页码和每一页的数量计算得到
+                    row.append('<td>'+((data.currentPage-1)*data.pageSize+i+1)+"</td>");
+                    //第二列名字
+                    row.append('<td>'+dataList[i].name+'</td>');
+                    //第三列分类
+                    row.append('<td id='+i+"col"+'>'+'</td>');
+                    //循环添加分类
+                    for (let j=0;j<dataList[i].tags.length;j++) {
+                        $("#"+i+"col").append('<span class="label label-primary">'+dataList[i].tags[j]+'</span>');
+                    }
+                    //第四列作者名
+                    row.append('<td>'+dataList[i].author+'</td>');
+                }
+                //下面是页码信息的添加
+                //循环添加页码
+                pageNumber.empty();
+                //刚开始的时候向前肯定不行
+                pageNumber.append('<li class="disabled" status="noAllow"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');
+                for(let i=1;i<=data.totalPage;i++){
+                    //如果恰好是当前页面，将按钮设置为激活状态
+                    if(i===data.currentPage){
+                        pageNumber.append('<li class="active"><a href="#" >'+i+'</a></li>');
+                        continue;
+                    }
+                    //不是当前页面
+                    pageNumber.append('<li><a href="#">'+i+'</a></li>');
+                }
+                //以防记录为0或者为1的时候向后按钮仍然可以按的bug
+                if(data.totalPage==0||data.totalPage==1) {pageNumber.append('<li class="disabled" status="noAllow"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                else {pageNumber.append('<li status="Next"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                pageNumber.append('<li><span>共'+data.totalPage+'页,'+data.totalRecord+'条记录</span></li>');
+            // <li>
+            //     <a href="#" aria-label="Previous">
+            //         <span aria-hidden="true">&laquo;</span>
+            //     </a>
+            //     </li>
+            //     <li><a href="#">1</a></li>
+            //     <li><a href="#">2</a></li>
+            //     <li><a href="#">3</a></li>
+            //     <li><a href="#">4</a></li>
+            //     <li><a href="#">5</a></li>
+            //     <li>
+            //     <a href="#" aria-label="Next">
+            //         <span aria-hidden="true">&raquo;</span>
+            //     </a>
+            //     </li>
+            //     <li>
+            //     <span>共5页，38条记录</span>
+            //     </li>
+            },"json");
+            //页面页数单击事件（翻页相关的处理，总共三种状态：博客总览状态）
+            pageNumber.on('click','li',function () {
+                let currentPage;
+                let object=$(this);
+                //禁止跳页
+                if(object.attr("status")==="noAllow"){return;}
+                //按钮向前
+                if(object.attr("status")==="Previous"){currentPage=pageNow-1;}
+                //按钮向后
+                else if(object.attr("status")==="Next"){currentPage=pageNow+1;}
+                //直接点击页数
+                else {currentPage = object.text();}
+                //如果是主页
+                if(pageStatus==="Main") {
+                    $.post("../MainPageShowServlet", {currentPage: currentPage, pageSize: "5"}, function (data) {
+                        pageNow = data.currentPage;
+                        let dataList = data.dataList;
+                        //清空列表原本的数据
+                        blogTable.empty();
+                        blogTable.append('<tbody></tbody>');
+                        let table = $("#blogShow tbody");
+                        table.append('<tr>' +
+                            '<td>#</td>' +
+                            '<td>博文名字</td>' +
+                            '<td>博文分类</td>' +
+                            '<td>博文作者</td>' +
+                            '</tr>'
+                        )
+                        //下面是博文信息的添加
+                        //循环添加博文信息行
+                        for (let i = 0; i < dataList.length; i++) {
+                            //先添加行标签并且设置id
+                            table.append('<tr id=' + dataList[i].id + '>' + '</tr>');
+                            //动态获取行对象
+                            let row = $("#" + dataList[i].id);
+                            //第一列根据当前页码和每一页的数量计算得到
+                            row.append('<td>' + ((data.currentPage - 1) * data.pageSize + i + 1) + "</td>");
+                            //第二列名字
+                            row.append('<td>' + dataList[i].name + '</td>');
+                            //第三列分类
+                            row.append('<td id=' + i + "col" + '>' + '</td>');
+                            //循环添加分类
+                            for (let j = 0; j < dataList[i].tags.length; j++) {
+                                $("#" + i + "col").append('<span class="label label-primary">' + dataList[i].tags[j] + '</span>');
+                            }
+                            //第四列作者名
+                            row.append('<td>' + dataList[i].author + '</td>');
+                        }
+                        //下面是页码信息的添加
+                        //先清空页码，然后循环添加页码
+                        pageNumber.empty();
+                        //添加向左翻页(如果是第一页，禁止向前翻页)
+                        if (pageNow === 1) {pageNumber.append('<li class="disabled"  status="noAllow"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');}
+                        else {pageNumber.append('<li status="Previous"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');}
+                        for (let i = 1; i <= data.totalPage; i++) {
+                            if (i === data.currentPage) {
+                                //恰好是当前页，设置为激活状态
+                                pageNumber.append('<li class="active"><a href="#" >' + i + '</a></li>');
+                                continue;
+                            }
+                            pageNumber.append('<li><a href="#">' + i + '</a></li>');
+                        }
+                        //添加向右翻页（如果是最后一页，禁止向后翻页）
+                        if (pageNow === data.totalPage) {pageNumber.append('<li class="disabled" status="noAllow"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                        else {pageNumber.append('<li status="Next"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                        //添加总的记录
+                        pageNumber.append('<li><span>共' + data.totalPage + '页,' + data.totalRecord + '条记录</span></li>');
+                    }, "json");
+                }
+                //搜索状态
+                else if(pageStatus==="explore"){
+                    $.post("../FindArticlesByExploreServlet",{currentPage:currentPage,pageSize:"5",condition:exploreValue},function (data) {
+                        //当前页码
+                        pageNow=data.currentPage;
+                        //获取文章集合（json格式）
+                        let dataList=data.dataList;
+                        //清空列表原有数据
+                        blogTable.empty();
+                        //添加表格体
+                        blogTable.append('<tbody></tbody>');
+                        let table=$("#blogShow tbody");
+                        //添加首行列名
+                        table.append('<tr>'+
+                            '<td>#</td>'+
+                            '<td>博文名字</td>'+
+                            '<td>博文分类</td>'+
+                            '<td>博文作者</td>'+
+                            '</tr>'
+                        )
+                        //下面是博文信息的添加
+                        //循环添加博文信息行
+                        for(let i=0;i<dataList.length;i++){
+                            //先添加行标签并且设置id
+                            table.append('<tr id='+dataList[i].id+'>'+'</tr>');
+                            //动态获取行对象
+                            let row=$("#"+dataList[i].id);
+                            //第一列根据当前页码和每一页的数量计算得到
+                            row.append('<td>'+((data.currentPage-1)*data.pageSize+i+1)+"</td>");
+                            //第二列名字
+                            row.append('<td>'+dataList[i].name+'</td>');
+                            //第三列分类
+                            row.append('<td id='+i+"col"+'>'+'</td>');
+                            //循环添加分类
+                            for (let j=0;j<dataList[i].tags.length;j++) {
+                                $("#"+i+"col").append('<span class="label label-primary">'+dataList[i].tags[j]+'</span>');
+                            }
+                            //第四列作者名
+                            row.append('<td>'+dataList[i].author+'</td>');
+                        }
+                        //下面是页码信息的添加
+                        //清空页码
+                        pageNumber.empty();
+                        //添加向左翻页(如果是第一页，禁止向前翻页)
+                        if (pageNow === 1) {pageNumber.append('<li class="disabled"  status="noAllow"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');}
+                        else {pageNumber.append('<li status="Previous"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');}
+                        //循环添加页码
+                        for(let i=1;i<=data.totalPage;i++){
+                            if(i===data.currentPage){
+                                //恰好是当前访问的页码，设置页码为激活状态
+                                pageNumber.append('<li class="active"><a href="#" >'+i+'</a></li>');
+                                continue;
+                            }
+                            pageNumber.append('<li><a href="#">'+i+'</a></li>');
+                        }
+                        //添加向右翻页（如果是最后一页，禁止向后翻页）
+                        if (pageNow === data.totalPage) {pageNumber.append('<li class="disabled" status="noAllow"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                        else {pageNumber.append('<li status="Next"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                    },"json");
+                }
+                //分类查看状态
+                else{
+                    $.post("../TagPageShowServlet",{currentPage:currentPage,pageSize:"5",tag:pageStatus},function (data) {
+                        //当前页码
+                        pageNow=data.currentPage;
+                        //获取文章集合（json格式）
+                        let dataList=data.dataList;
+                        //清空列表原有数据
+                        blogTable.empty();
+                        //添加表格体
+                        blogTable.append('<tbody></tbody>');
+                        let table=$("#blogShow tbody");
+                        //添加首行列名
+                        table.append('<tr>'+
+                            '<td>#</td>'+
+                            '<td>博文名字</td>'+
+                            '<td>博文分类</td>'+
+                            '<td>博文作者</td>'+
+                            '</tr>'
+                        )
+                        //下面是博文信息的添加
+                        //循环添加博文信息行
+                        for(let i=0;i<dataList.length;i++){
+                            //先添加行标签并且设置id
+                            table.append('<tr id='+dataList[i].id+'>'+'</tr>');
+                            //动态获取行对象
+                            let row=$("#"+dataList[i].id);
+                            //第一列根据当前页码和每一页的数量计算得到
+                            row.append('<td>'+((data.currentPage-1)*data.pageSize+i+1)+"</td>");
+                            //第二列名字
+                            row.append('<td>'+dataList[i].name+'</td>');
+                            //第三列分类
+                            row.append('<td id='+i+"col"+'>'+'</td>');
+                            //循环添加分类
+                            for (let j=0;j<dataList[i].tags.length;j++) {
+                                $("#"+i+"col").append('<span class="label label-primary">'+dataList[i].tags[j]+'</span>');
+                            }
+                            //第四列作者名
+                            row.append('<td>'+dataList[i].author+'</td>');
+                        }
+                        //下面是页码信息的添加
+                        //清空页码
+                        pageNumber.empty();
+                        //添加向左翻页(如果是第一页，禁止向前翻页)
+                        if (pageNow === 1) {pageNumber.append('<li class="disabled"  status="noAllow"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');}
+                        else {pageNumber.append('<li status="Previous"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');}
+                        //循环添加页码
+                        for(let i=1;i<=data.totalPage;i++){
+                            if(i===data.currentPage){
+                                //恰好是当前访问的页码，设置页码为激活状态
+                                pageNumber.append('<li class="active"><a href="#" >'+i+'</a></li>');
+                                continue;
+                            }
+                            pageNumber.append('<li><a href="#">'+i+'</a></li>');
+                        }
+                        //添加向右翻页（如果是最后一页，禁止向后翻页）
+                        if (pageNow === data.totalPage) {pageNumber.append('<li class="disabled" status="noAllow"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                        else {pageNumber.append('<li status="Next"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                    },"json");
+                }
+            });
+            //获取分类下的页面(博文分类，初始化，还没有进行翻页)
+            $("#tagPage li").click(function () {
+                //三目表达式获取分类
+                let tag = $(this).text()==="其它"?"无":$(this).text()
+                pageStatus=tag;
+                $.post("../TagPageShowServlet",{currentPage:"1",pageSize:"5",tag:tag},function (data) {
+                    //当前页码
+                    pageNow=1;
+                    //获取文章集合（json格式）
+                    let dataList=data.dataList;
+                    //清空列表原有数据
+                    blogTable.empty();
+                    //添加表格体
+                    blogTable.append('<tbody></tbody>');
+                    let table=$("#blogShow tbody");
+                    //添加首行列名
+                    table.append('<tr>'+
+                        '<td>#</td>'+
+                        '<td>博文名字</td>'+
+                        '<td>博文分类</td>'+
+                        '<td>博文作者</td>'+
+                        '</tr>'
+                    )
+                    //下面是博文信息的添加
+                    //循环添加博文信息行
+                    for(let i=0;i<dataList.length;i++){
+                        //先添加行标签并且设置id
+                        table.append('<tr id='+dataList[i].id+'>'+'</tr>');
+                        //动态获取行对象
+                        let row=$("#"+dataList[i].id);
+                        //第一列根据当前页码和每一页的数量计算得到
+                        row.append('<td>'+((data.currentPage-1)*data.pageSize+i+1)+"</td>");
+                        //第二列名字
+                        row.append('<td>'+dataList[i].name+'</td>');
+                        //第三列分类
+                        row.append('<td id='+i+"col"+'>'+'</td>');
+                        //循环添加分类
+                        for (let j=0;j<dataList[i].tags.length;j++) {
+                            $("#"+i+"col").append('<span class="label label-primary">'+dataList[i].tags[j]+'</span>');
+                        }
+                        //第四列作者名
+                        row.append('<td>'+dataList[i].author+'</td>');
+                    }
+                    //下面是页码信息的添加
+                    //循环添加页码
+                    pageNumber.empty();
+                    //刚开始的时候向前肯定不行
+                    pageNumber.append('<li class="disabled" status="noAllow"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');
+                    for(let i=1;i<=data.totalPage;i++){
+                        if(i===data.currentPage){
+                            pageNumber.append('<li class="active"><a href="#" >'+i+'</a></li>');
+                            continue;
+                        }
+                        pageNumber.append('<li><a href="#">'+i+'</a></li>');
+                    }
+                    if(data.totalPage==0||data.totalPage==1) {pageNumber.append('<li class="disabled" status="noAllow"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                    else {pageNumber.append('<li status="Next"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                    pageNumber.append('<li><span>共'+data.totalPage+'页,'+data.totalRecord+'条记录</span></li>');
+                },"json");
+            });
+            //搜索文章按钮绑定事件
+            $("#exploreArticlesButton").click(function () {
+                //向服务器请求当前主页面的博文信息（初始化页面，博文总览）
+                let condition = $("#wantToExploreCondition").val();
+                if(condition==null||condition===""){
+                    alert("搜索条件不能为空！");
+                    return;
+                }
+                exploreValue=condition;
+                $.post("../FindArticlesByExploreServlet",{currentPage:"1",pageSize:"5",condition:exploreValue},function (data) {
+                    //当前页码
+                    pageNow=1;
+                    pageStatus="explore";
+                    //获取文章集合（json格式）
+                    let dataList=data.dataList;
+                    //清空列表原有数据
+                    blogTable.empty();
+                    //添加表格体
+                    blogTable.append('<tbody></tbody>');
+                    let table=$("#blogShow tbody");
+                    //添加首行列名
+                    table.append('<tr>'+
+                        '<td>#</td>'+
+                        '<td>博文名字</td>'+
+                        '<td>博文分类</td>'+
+                        '<td>博文作者</td>'+
+                        '</tr>'
+                    )
+                    //下面是博文信息的添加
+                    //循环添加博文信息行
+                    for(let i=0;i<dataList.length;i++){
+                        //先添加行标签并且设置id
+                        table.append('<tr id='+dataList[i].id+'>'+'</tr>');
+                        //动态获取行对象
+                        let row=$("#"+dataList[i].id);
+                        //第一列根据当前页码和每一页的数量计算得到
+                        row.append('<td>'+((data.currentPage-1)*data.pageSize+i+1)+"</td>");
+                        //第二列名字
+                        row.append('<td>'+dataList[i].name+'</td>');
+                        //第三列分类
+                        row.append('<td id='+i+"col"+'>'+'</td>');
+                        //循环添加分类
+                        for (let j=0;j<dataList[i].tags.length;j++) {
+                            $("#"+i+"col").append('<span class="label label-primary">'+dataList[i].tags[j]+'</span>');
+                        }
+                        //第四列作者名
+                        row.append('<td>'+dataList[i].author+'</td>');
+                    }
+                    //下面是页码信息的添加
+                    //循环添加页码
+                    pageNumber.empty();
+                    //刚开始的时候向前肯定不行
+                    pageNumber.append('<li class="disabled" status="noAllow"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');
+                    for(let i=1;i<=data.totalPage;i++){
+                        if(i===data.currentPage){
+                            pageNumber.append('<li class="active"><a href="#" >'+i+'</a></li>');
+                            continue;
+                        }
+                        pageNumber.append('<li><a href="#">'+i+'</a></li>');
+                    }
+                    if(data.totalPage==0||data.totalPage==1) {pageNumber.append('<li class="disabled" status="noAllow"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                    else {pageNumber.append('<li status="Next"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                    pageNumber.append('<li><span>共'+data.totalPage+'页,'+data.totalRecord+'条记录</span></li>');
+                },"json");
+            });
+            //登录按钮事件绑定
+            $("#loginButton").click(function () {
+                let account =$("#loginAcount").val();
+                let passWord =$("#loginPassword").val();
+                //请求
+                $.post("../LoginServlet",{account:account,passWord:passWord},function (data) {
+                    //用户不存在
+                    if("notExist"===data.status){
+                        alert("用户不存在，请检查账号是否正确！");
+                    }
+                    //密码不正确
+                    else if("wrongPassWord"===data.status){
+                        alert("密码错误，请检查密码是否输入正确！");
+                    }
+                    //登录成功
+                    else {
+                        alert("登录成功");
+                        // $("#mySeting").prop("href","myseting.html?"+"login="+cookieLogin+"&account="+cookieAccount);
+                        $("#Login").modal('hide');
+                        $("img").prop("src",data.face);
+                        model1.hide();
+                        model2.hide();
+                        $("#faceDropDown").show();
+                    }
+                },"json")
+            })
+            //注册按钮事件绑定
+            $("#registerButton").click(function () {
+                let userName = $("#registerUserName").val();
+                let account =$("#registerAccount").val();
+                let passWord=$("#registerPassword").val();
+                let repeatPassWord=$("#repeatPassword").val();
+                //判断是否符合前面两个条件，a是账号的条件，b是用户名的条件，只有a和b的事件整个全部执行才可以
+                if(!(a&&b)){
+                    alert("请确认账号与用户名是否符合格式");
+                    return;
+                }
+                //两次密码不相同
+                if(passWord!==repeatPassWord){
+                    alert("两次密码不相同,请重新输入");
+                    return;
+                }
+                //向服务器请求注册
+                $.post("../RegisterServlet",{name:userName,account:account,passWord:passWord},function () {
+                    alert("注册成功！马上登录把！");
+                    $("#register").modal('hide');
+                    $("#Login").modal('show');
+                },"text");
+            });
+            //注册监测用户名是否存在
+            $("#registerUserName").blur(function () {
+                a=false;
+                let userName = $(this).val();
+                let registerUserNameDiv=$("#registerUserNameDiv");
+                let helpBlockName =$("#helpBlockName");
+                //输入为空
+                if(userName == null || userName === ''){
+                    registerUserNameDiv.removeClass("has-success");
+                    registerUserNameDiv.removeClass("has-error");
+                    helpBlockName.text("不超过10个字符");
+                    return;
+                }
+                //超过十个字符
+                if(userName.length>10){
+                    registerUserNameDiv.removeClass("has-success");
+                    registerUserNameDiv.addClass("has-error");
+                    helpBlockName.text("不超过10个字符");
+                }
+                //发送请求
+                else {
+                    //向服务器请求用户名是否存在
+                    $.post("../IsExistByNameServlet",{message:userName},function (data) {
+                        //存在
+                        if(data==="yes"){
+                            registerUserNameDiv.removeClass("has-success");
+                            registerUserNameDiv.addClass("has-error");
+                            helpBlockName.text("用户名已存在");
+                            return;
+                        }
+                        //不存在
+                        registerUserNameDiv.removeClass("has-error");
+                        registerUserNameDiv.addClass("has-success");
+                        helpBlockName.text("用户名可用");
+                        a=true;
+                    },"text");
+                }
+            })
+            //监测账号是否存在
+            $("#registerAccount").blur(function () {
+                b=false;
+                let account =$(this).val();
+                let reg = new RegExp("^[0-9]*$");
+                let registerDiv= $("#registerAccountDiv");
+                let helpBlockAccount=$("#helpBlockAccount");
+                if(account == null || account === ''){
+                    registerDiv.removeClass("has-success");
+                    registerDiv.removeClass("has-error");
+                    helpBlockAccount.text("不超过15个字符长度（并且全为数字）");
+                    return;
+                }
+                if(account.length>15){
+                    registerDiv.removeClass("has-success");
+                    registerDiv.addClass("has-error");
+                    helpBlockAccount.text("不超过15个字符！");
+                }
+                else if(!reg.test(account)){
+                    registerDiv.removeClass("has-success");
+                    registerDiv.addClass("has-error");
+                    helpBlockAccount.text("请输入纯数字账号！");
+                }
+                //格式正确，发送请求
+                else {
+                    $.post("../IsExistByAccountServlet",{message:account},function (data) {
+                        //存在
+                        if(data==="yes"){
+                            registerDiv.removeClass("has-success");
+                            registerDiv.addClass("has-error");
+                            helpBlockAccount.text("账号已存在");
+                            return
+                        }
+                        //不存在
+                        registerDiv.removeClass("has-error");
+                        registerDiv.addClass("has-success");
+                        helpBlockAccount.text("账号可用")
+                        b=true;
+                    },"text");
+                }
+            })
+            //退出账号
+            $("#loginOut").click(function () {
+                let sure = confirm("确定退出账号吗？");
+                if(true===sure){
+                    $("#faceDropDown").hide();
+                    //展示模拟框按钮
+                    model1.show();
+                    model2.show();
+                    //删除cookie，清除登录信息
+                    $.removeCookie("login",{ path: '/'});
+                    $.removeCookie("account",{ path: '/'});
+                }
+            })
+            //给搜索栏绑定回车事件,按回车就是搜索文章
+            $("#wantToExploreCondition").keypress(function (e) {
+                let eCode = e.keyCode ? e.keyCode : e.which ? e.which : e.charCode;
+                if(eCode===13) {
+                    $("#exploreArticlesButton").trigger("click");
+                    return false;
+                }
+            });
+            //博客总览跳转
+            $("#allBlogs").click(function () {
+                let arr = location.href.split("/");
+                delete arr[arr.length-1];
+                let dir = arr.join("/");
+                //重定向到blog页面
+                $(window).attr('location',dir+"blogs.html");
+            })
+            //设置单击浏览博文的事件
+            blogTable.on('click','tr',function () {
+                let id = $(this).attr("id");
+                //判断id是否为空
+                if(typeof id ===typeof undefined || id===false){
+                    return;
+                }
+                window.open("./viewBlog.html?id="+id);
+            })
+            //设置鼠标移动到某一个博客上面，鼠标形状变成小手，这样用户体验更好（使用这种事件添加方式是因为动态添加事件的原因）
+            blogTable.on('mouseover','tr',function () {
+                $(this).css("cursor","pointer");
+            })
+        })
+    </script>
+</head>
+<!--页面主体-->
+<body style="background: #e2e2e2 url(../img/home.jpg) no-repeat fixed center;
+        background-size: cover;">
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="index.html">首页</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse " id="bs-example-navbar-collapse-1">
+            <form class="navbar-form navbar-left">
+                <div class="form-group">
+                    <label>
+                        <input type="text" class="form-control" id="wantToExploreCondition" placeholder="输入博客标题或者作者名称">
+                    </label>
+                </div>
+                <button type="button" class="btn btn-default" id="exploreArticlesButton">搜索</button>
+            </form>
+            <ul class="nav navbar-nav navbar-right">
+                <li><button type="button" class="btn btn-default" id="model1" data-toggle="modal" data-target="#register" data-whatever="@mdo">注册</button>&nbsp;&nbsp;</li>
+                <li><button type="button" class="btn btn-default" id="model2" data-toggle="modal" data-target="#Login" data-whatever="@mdo">登录</button></li>
+                <li class="dropdown" id="faceDropDown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img src="../img/home.jpg"  width="30px" height="30px"  alt="我的信息"><span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="addblogs.html" id="addBlog">添加博客</a></li>
+                        <li><a href="myseting.html" id="mySeting">个人信息</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#" id="loginOut">退出账号</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container">
+    <div class="row">
+        <div class=" col-sm-2 btn-group-vertical" role="group" aria-label="...">
+            <button type="button" class="btn btn-default" id="allBlogs">博客总览</button>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    分类查看
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" id="tagPage">
+                    <li><a href="#" id="tagAlgorithm">算法</a></li>
+                    <li><a href="#" id="tagAfter">后端</a></li>
+                    <li><a href="#" id="tagOther">其它</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-sm-8 col-lg-offset-2">
+                <table class="table table-hover" id="blogShow">
+                </table>
+            <nav aria-label="Page navigation">
+                <ul class="pagination" id="pageNumber">
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+<!--到此为止-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--注册模拟框-->
+<div class="modal fade" id="register" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="RegisterMessage">注册新用户</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group" id="registerUserNameDiv">
+                        <label for="registerUserName" class="control-label">用户名</label>
+                        <input type="text" class="form-control" id="registerUserName" placeholder="不超过10个字符"  aria-describedby="helpBlockName" required="required">
+                        <span id="helpBlockName" class="help-block">不超过10个字符</span>
+                    </div>
+                    <div class="form-group" id="registerAccountDiv">
+                        <label for="registerAccount" class="control-label">账号</label>
+                        <input type="text" class="form-control" id="registerAccount" placeholder="不超过15个字符长度（并且全为数字"  aria-describedby="helpBlockAccount" required="required">
+                        <span id="helpBlockAccount" class="help-block">不超过15个字符长度（并且全为数字）</span>
+                    </div>
+                    <div class="form-group" id="registerPasswordDiv">
+                        <label for="registerPassword" class="control-label">密码</label>
+                        <input type="password" class="form-control" id="registerPassword" placeholder="不超过20个字符"  aria-describedby="helpBlockPassWord" required="required">
+                        <span id="helpBlockPassWord" class="help-block">不超过20个字符</span>
+                    </div>
+                    <div class="form-group" id="repeatPasswordDiv">
+                        <label for="repeatPassword" class="control-label">再次输入密码</label>
+                        <input type="password" class="form-control" id="repeatPassword" placeholder="再次输入密码"  aria-describedby="helpBlockRepeatPassWord" required="required">
+                        <span id="helpBlockRepeatPassWord" class="help-block"></span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="registerButton">注册</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--登录模拟框-->
+<div class="modal fade" id="Login" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="LoginMessage">登录</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="loginAcount" class="control-label">账号</label>
+                        <input type="text" class="form-control" id="loginAcount" required="required">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword" class="control-label">密码</label>
+                        <input type="password" class="form-control" id="loginPassword" required="required">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" >
+                <button type="button" class="btn btn-primary" id="loginButton">登录</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--用来存储用户信息-->
+<div id="userInf" account="" face="" isLogin="" ></div>
+</body>
+</html>
