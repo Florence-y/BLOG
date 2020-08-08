@@ -49,4 +49,10 @@ public class test {
     public void C3p0Test(){
         C3P0Until.getConnection();
     }
+    @Test
+    public void string(){
+        String ss="算法＆后端";
+        String[] s=ss.split("＆");
+        System.out.println(s);
+    }
 }

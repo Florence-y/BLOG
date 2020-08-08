@@ -260,6 +260,8 @@
                         //添加向右翻页（如果是最后一页，禁止向后翻页）
                         if (pageNow === data.totalPage) {pageNumber.append('<li class="disabled" status="noAllow"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
                         else {pageNumber.append('<li status="Next"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                        //添加总的记录
+                        pageNumber.append('<li><span>共' + data.totalPage + '页,' + data.totalRecord + '条记录</span></li>');
                     },"json");
                 }
                 //分类查看状态
@@ -320,6 +322,8 @@
                         //添加向右翻页（如果是最后一页，禁止向后翻页）
                         if (pageNow === data.totalPage) {pageNumber.append('<li class="disabled" status="noAllow"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
                         else {pageNumber.append('<li status="Next"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                        //添加总的记录
+                        pageNumber.append('<li><span>共' + data.totalPage + '页,' + data.totalRecord + '条记录</span></li>');
                     },"json");
                 }
             });
@@ -452,6 +456,14 @@
             $("#loginButton").click(function () {
                 let account =$("#loginAcount").val();
                 let passWord =$("#loginPassword").val();
+                if(account==null||account===""){
+                    alert("账号不能为空");
+                    return;
+                }
+                if(passWord==null||passWord===""){
+                    alert("密码不能为空");
+                    return;
+                }
                 //请求
                 $.post("../LoginServlet",{account:account,passWord:passWord},function (data) {
                     //用户不存在

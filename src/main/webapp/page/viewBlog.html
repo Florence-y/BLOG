@@ -50,7 +50,7 @@
                     $("#"+comments[i].id+"row").append('<div class="media col-md-offset-1" id='+comments[i].id+"media"+'></div>');
                     row=$("#"+comments[i].id+"media");
                     //添加评论者的头像
-                    row.append('<div class="media-left"><a href="#"><img status="face" class="media-object" width="64" height="64" alt='+comments[i].userName+" src="+comments[i].userFace+'>'+'</a></div>');
+                    row.append('<div class="media-left"><a href="javascript:void(0);"><img status="face" class="media-object" width="64" height="64" alt='+comments[i].userName+" src="+comments[i].userFace+'>'+'</a></div>');
                     //添加评论者名字，内容，时间，点赞数
                     row.append('<div class="media-body"><h4 class="media-heading">'+comments[i].userName+'</h4><p>'+comments[i].content+'</p><div><span>'+comments[i].date+'</span>&nbsp;&nbsp;' +
                         '<span><a href="javascript:void(0);"><img agreeId='+comments[i].id+' src="../img/agree.png" height="18" width="18"></a></span><span id='+comments[i].id+"agreeCount"+'>'+comments[i].agreeCount+'</span></div></div>');
@@ -98,23 +98,23 @@
                     return;
                 }
                 $.post("../AddCommentServlet",{userName:cookieLogin,content:commentContent.val(),articleId:id},function (data) {
-                    if(data!==0){
+                    if(data.id!==0){
                         //设置日期
                         let now = new Date();
                         let time = now.getFullYear() + "-" +((now.getMonth()+1)<10?"0":"")+(now.getMonth()+1)+"-"+(now.getDate()<10?"0":"")+now.getDate();
-                        commentDiv.append('<div class=row id='+data+"row"+'></div><br>');
-                        $("#"+data+"row").append('<div class="media col-md-offset-1" id='+data+"media"+'></div>');
-                        row=$("#"+data+"media");
+                        commentDiv.append('<div class=row id='+data.id+"row"+'></div><br>');
+                        $("#"+data.id+"row").append('<div class="media col-md-offset-1" id='+data.id+"media"+'></div>');
+                        row=$("#"+data.id+"media");
                         //添加评论者的头像
-                        row.append('<div class="media-left"><a href="#"><img status="face" class="media-object" width="64" height="64" alt='+cookieLogin+" src="+myFace+'>'+'</a></div>');
+                        row.append('<div class="media-left"><a href="javascript:void(0);"><img status="face" class="media-object" width="64" height="64" alt='+cookieLogin+" src="+myFace+'>'+'</a></div>');
                         //添加评论者名字，内容，时间，点赞数
-                        row.append('<div class="media-body"><h4 class="media-heading">'+cookieLogin+'</h4><p>'+commentContent.val()+'</p><div><span>'+time+'</span>&nbsp;&nbsp;' +
-                            '<span><img agreeId='+data+' src="../img/agree.png" height="18" width="18"> </span><span id='+data+"agreeCount"+'>0</span></div></div>');
+                        row.append('<div class="media-body"><h4 class="media-heading">'+cookieLogin+'</h4><p>'+data.content+'</p><div><span>'+time+'</span>&nbsp;&nbsp;' +
+                            '<span><a href="javascript:void(0);"><img agreeId='+data.id+' src="../img/agree.png" height="18" width="18"></a> </span><span id='+data.id+"agreeCount"+'>0</span></div></div>');
                         commentContent.val("");
                         return;
                     }
                     alert("评论失败");
-                },"text")
+                },"json")
             });
         })
     </SCRIPT>

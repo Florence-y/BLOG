@@ -242,7 +242,7 @@
                     //选中的分类对象
                     let tags = $("input[disabled=disabled]");
                     //具体的分类
-                    let tagsDetail
+                    let tagsDetail;
                     //没有选择分类
                     if(tags.length===0){
                         tagsDetail="无"
@@ -481,6 +481,71 @@
                         $.post("../DeleteArticleServlet",{id:id},function (data) {
                             if(data==="success"){
                                 alert("删除成功！");
+                                $("#homeShow").hide();
+                                $("#setingShow").hide();
+                                $("#navPage").show();
+                                $("#editBlogShow").show();
+                                $.post("../GetArticleByNameServlet",{currentPage:"1",pageSize:"5",userName:cookieLogin},function (data) {
+                                    //当前页码
+                                    pageNow=1;
+                                    //获取文章集合（json格式）
+                                    let dataList=data.dataList;
+                                    //清空列表原有数据
+                                    blogTable.empty();
+                                    //添加表格体
+                                    blogTable.append('<tbody></tbody>');
+                                    let table=$("#myBlogsTable tbody");
+                                    //添加首行列名
+                                    table.append('<tr>'+
+                                        '<td>#</td>'+
+                                        '<td>博文名字</td>'+
+                                        '<td>博文分类</td>'+
+                                        '<td>博客操作</td>>'+
+                                        '</tr>'
+                                    )
+                                    //下面是博文信息的添加
+                                    //循环添加博文信息行
+                                    for(let i=0;i<dataList.length;i++){
+                                        //先添加行标签并且设置id
+                                        table.append('<tr id='+dataList[i].id+'>'+'</tr>');
+                                        //动态获取行对象
+                                        let row=$("#"+dataList[i].id);
+                                        //第一列根据当前页码和每一页的数量计算得到
+                                        row.append('<td>'+((data.currentPage-1)*data.pageSize+i+1)+"</td>");
+                                        //第二列名字
+                                        row.append('<td id='+dataList[i].id+'title'+'>'+dataList[i].name+'</td>');
+                                        //第三列分类
+                                        row.append('<td id='+dataList[i].id+"col"+'>'+'</td>');
+                                        //循环添加分类
+                                        for (let j=0;j<dataList[i].tags.length;j++) {
+                                            $("#"+dataList[i].id+"col").append('<span class="label label-primary">'+dataList[i].tags[j]+'</span>');
+                                        }
+                                        //第四列操作
+                                        row.append('<td><div class="btn-group"  role="group" aria-label="...">' +
+                                            '<button type="button" myid='+dataList[i].id +' status="check" class="btn btn-info">查看</button>' +
+                                            '<button type="button" myid='+dataList[i].id +' status="edit" class="btn btn-primary">编辑</button>' +
+                                            '<button type="button" myid='+dataList[i].id +' status="delete" class="btn btn-danger">删除</button>' +
+                                            '</div></td>');
+                                    }
+                                    //下面是页码信息的添加
+                                    //循环添加页码
+                                    pageNumber.empty();
+                                    //刚开始的时候向前肯定不行
+                                    pageNumber.append('<li class="disabled" status="noAllow"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');
+                                    for(let i=1;i<=data.totalPage;i++){
+                                        //如果恰好是当前页面，将按钮设置为激活状态
+                                        if(i===data.currentPage){
+                                            pageNumber.append('<li class="active"><a href="#" >'+i+'</a></li>');
+                                            continue;
+                                        }
+                                        //不是当前页面
+                                        pageNumber.append('<li><a href="#">'+i+'</a></li>');
+                                    }
+                                    //以防记录为0或者为1的时候向后按钮仍然可以按的bug
+                                    if(data.totalPage===0||data.totalPage===1) {pageNumber.append('<li class="disabled" status="noAllow"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                                    else {pageNumber.append('<li status="Next"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');}
+                                    pageNumber.append('<li><span>共'+data.totalPage+'页,'+data.totalRecord+'条记录</span></li>');
+                                },"json");
                             }
                         },"text");
                     }

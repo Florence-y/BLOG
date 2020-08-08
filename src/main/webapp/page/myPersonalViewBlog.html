@@ -24,6 +24,7 @@
             let cookieLogin=$.cookie("login");
             let cookieAccount=$.cookie("account");
             let id = getQueryVariable("id");
+            let commentDiv=$("#comment");
             //未登录设置状态
             if(cookieLogin==null||cookieLogin===''||cookieAccount==null||cookieAccount===''){
                 let arr = location.href.split("/");
@@ -35,11 +36,23 @@
             }
             //获取cookie信息（是否登录的验证）
             $.post("../ViewBlogServlet",{id:id,myName:cookieLogin},function (data) {
+                let row;
+                let comments=data.allComment;
                 //设置标题
                 $("title").html(data.title);
                 $("#blogTitle").text(data.title);
                 //设置博文内容
                 $("#content").text(data.content);
+                for (let i=0;i<comments.length;i++){
+                    commentDiv.append('<div class=row id='+comments[i].id+"row"+'></div><br>');
+                    $("#"+comments[i].id+"row").append('<div class="media col-md-offset-1" id='+comments[i].id+"media"+'></div>');
+                    row=$("#"+comments[i].id+"media");
+                    //添加评论者的头像
+                    row.append('<div class="media-left"><a href="javascript:void(0);"><img status="face" class="media-object" width="64" height="64" alt='+comments[i].userName+" src="+comments[i].userFace+'>'+'</a></div>');
+                    //添加评论者名字，内容，时间，点赞数
+                    row.append('<div class="media-body"><h4 class="media-heading">'+comments[i].userName+'</h4><p>'+comments[i].content+'</p><div><span>'+comments[i].date+'</span>&nbsp;&nbsp;' +
+                        '<span><a href="javascript:void(0);"><img agreeId='+comments[i].id+' src="../img/agree.png" height="18" width="18"></a></span><span id='+comments[i].id+"agreeCount"+'>'+comments[i].agreeCount+'</span></div></div>');
+                }
             },"json");
         })
     </SCRIPT>
@@ -66,19 +79,6 @@
     <br>
     <h4 align="center">评论</h4>
     <div class="container" id="comment">
-        <div class="row">
-            <div class="media col-md-offset-1" >
-                <div class="media-left">
-                    <a href="#">
-                        <img class="media-object" src="../img/home.jpg" alt="..." width="64" height="64">
-                    </a>
-                </div>
-                <div class="media-body">
-                    <h4 class="media-heading">吴晓吟</h4>
-                    <span class="label-default">你真帮 我我我我往往我</span>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 </body>

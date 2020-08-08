@@ -89,9 +89,9 @@ public interface ArticleServer {
     /**
      * 添加评论
      * @param comment 评论对象
-     * @return 评论id
+     * @return 评论的对象
      */
-    int addComment(Comment comment);
+    Comment addComment(Comment comment);
 
     /**
      * 点赞功能

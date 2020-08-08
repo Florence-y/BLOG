@@ -54,7 +54,7 @@ public class AddBlogServlet extends HttpServlet {
         //设置文章标题
         article.setName(request.getParameter("title"));
         //获取标签（多个分类用&分隔开）
-        String[] tag=request.getParameter("tagsDetail").split("&");
+        String[] tag=request.getParameter("tagsDetail").split("＆");
         //加入到集合
         List<String> tags = new ArrayList<>(Arrays.asList(tag));
         article.setTags(tags);

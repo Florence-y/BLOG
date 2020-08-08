@@ -21,6 +21,7 @@ public class EditBlogServlet extends HttpServlet {
         //调用服务查看是否修改成功
         boolean isSuccess=server.editArticle(request.getParameter("id"),request.getParameter("title"),
                 request.getParameter("content"),request.getParameter("tagsDetail"));
+        System.out.println(request.getParameter("tagsDetail"));
         //修改成功
         if(isSuccess){
             response.getWriter().write("success");

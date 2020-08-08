@@ -11,6 +11,6 @@ import org.junit.Test;
 public class XssHttpServletRequestWrapperTest {
     @Test
     public void xssDefender(){
-        System.out.println(XssHttpServletRequestWrapper.xssEncode("<script>alert(1)</script>"));
+        System.out.println(XssHttpServletRequestWrapper.xssEncode("<script>alert(6666)</script> <h1>dada</h1>"));
     }
 }

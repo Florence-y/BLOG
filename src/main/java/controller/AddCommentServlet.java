@@ -1,5 +1,6 @@
 package controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import myinterface.ArticleServer;
 import pojo.Comment;
 import server.ArticleServerImpl;
@@ -19,13 +20,14 @@ public class AddCommentServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         //设置编码，防止中文乱码
-        response.setContentType("text/html;charset=UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
         ArticleServer server = new ArticleServerImpl();
         //调用服务添加评论
-        int commentId=server.addComment(setCommentInf(request));
-        //返回评论id
-        response.getWriter().write(Integer.toString(commentId));
+        Comment commentObject=server.addComment(setCommentInf(request));
+        //返回评论对象
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.writeValue(response.getWriter(),commentObject);
     }
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {

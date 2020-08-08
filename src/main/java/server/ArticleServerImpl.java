@@ -261,7 +261,7 @@ public class ArticleServerImpl implements ArticleServer {
         tagDao = new TagDaoImpl();
         //先删除原有分类，再添加新的分类
         boolean changeSort= tagDao.deleteArticleSort(Integer.parseInt(id))&&tagDao.addArticleIdLinkTagId(Integer.parseInt(id),
-                new ArrayList<>(Arrays.asList(tagsDetail.split("&"))));
+                new ArrayList<>(Arrays.asList(tagsDetail.split("＆"))));
         //修改文章
         boolean changeBlog= articleDao.editBlog(Integer.parseInt(id),title,content);
         //是否成功
@@ -288,12 +288,14 @@ public class ArticleServerImpl implements ArticleServer {
     /**
      * 添加评论
      * @param comment 评论对象
-     * @return 返回评论id
+     * @return 返回评论对象
      */
     @Override
-    public int addComment(Comment comment) {
+    public Comment addComment(Comment comment) {
         commentDao= new CommentDaoImpl();
-        return commentDao.add(comment);
+        int id=commentDao.add(comment);
+        comment.setId(id);
+        return comment;
     }
 
     /**

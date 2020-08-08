@@ -1,9 +1,17 @@
 package test;
 
+import dao.ArticleDaoImpl;
+import dao.TagDaoImpl;
+import myinterface.ArticleDao;
 import myinterface.ArticleServer;
 import org.junit.Test;
 import org.omg.CORBA.PUBLIC_MEMBER;
+import pojo.Article;
+import pojo.Page;
 import server.ArticleServerImpl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -41,5 +49,24 @@ public class ArticleServerImplTest {
     public void agree() {
         ArticleServer a = new ArticleServerImpl();
         a.agreeComment("1","1");
+    }
+    @Test
+    public void getTag(){
+        ArticleServer server= new ArticleServerImpl();
+        Page<Article> tagPage = server.getTagPage("2",
+                "5", "后端");
+        System.out.println(tagPage);
+        //返回得到的页面对象给前端渲染
+    }
+    @Test
+    public void changeTag(){
+        String tagsDetail ="算法&后端";
+        ArticleDao articleDao = new ArticleDaoImpl();
+        TagDaoImpl tagDao = new TagDaoImpl();
+        //先删除原有分类，再添加新的分类
+        boolean changeSort= tagDao.deleteArticleSort(4)&&tagDao.addArticleIdLinkTagId(4,
+                new ArrayList<>(Arrays.asList(tagsDetail.split("&"))));
+        //修改文章
+        //是否成功
     }
 }
