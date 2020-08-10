@@ -30,4 +30,11 @@ public interface CommentDao {
      * @return 当前点赞数
      */
     String changeAgreeCount(int commentId ,int nowAgreeCount);
+
+    /**
+     * 根据文章id删除评论
+     * @param id 文章id
+     * @return 是否成功
+     */
+    boolean deleteByArticleId(int id);
 }

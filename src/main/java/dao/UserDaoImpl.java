@@ -270,6 +270,7 @@ public class UserDaoImpl implements UserDao {
             //清理数据库资源
             C3P0Until.close(connection,preparedStatement,resultSet);
         }
+
         return null;
     }
 
@@ -280,12 +281,13 @@ public class UserDaoImpl implements UserDao {
      */
     private User setUserInf(ResultSet resultset){
         try {
+            User user = new User();
             //用户不存在
             if(!resultset.next()){
-                return null;
+                 user.setFace("../img/userAlreadyDeleted.jpg");
+                 return user;
             }
             //下面是依次设置信息
-            User user = new User();
             //设置用户id
             user.setId(resultset.getInt("id"));
             //设置用户账号

@@ -100,7 +100,9 @@ public enum MySql {
     //删除文章
     DELETE_ARTICLE("DELETE FROM articles WHERE id= ?"),
     //删除文章分类
-    DELETE_ARTICLE_SORT("DELETE FROM sortLinkArticle WHERE articleId = ?")
+    DELETE_ARTICLE_SORT("DELETE FROM sortLinkArticle WHERE articleId = ?"),
+    //根据文章id删除评论
+    DELETE_COMMENTS_BY_ARTICLE_ID("DELETE FROM comment WHERE articleId= ?")
     ;
 
     /**

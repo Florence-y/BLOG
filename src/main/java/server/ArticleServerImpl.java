@@ -277,12 +277,16 @@ public class ArticleServerImpl implements ArticleServer {
     public boolean deleteArticle(String articleId) {
         articleDao = new ArticleDaoImpl();
         tagDao = new TagDaoImpl();
+        commentDao=new CommentDaoImpl();
+        int id=Integer.parseInt(articleId);
         //删除文章主体内容
-        boolean deleteContent=articleDao.delete(Integer.parseInt(articleId));
+        boolean deleteContent=articleDao.delete(id);
         //删除文章分类
-        boolean deleteTag =tagDao.deleteArticleSort(Integer.parseInt(articleId));
+        boolean deleteTag =tagDao.deleteArticleSort(id);
+        //删除文章拥有的评论
+        boolean deleteComment = commentDao.deleteByArticleId(id);
         //返回删除结果
-        return deleteContent&&deleteTag;
+        return deleteContent&&deleteTag&&deleteComment;
     }
 
     /**

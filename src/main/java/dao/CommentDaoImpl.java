@@ -130,6 +130,31 @@ public class CommentDaoImpl implements CommentDao {
         return "-1";
     }
 
+    /**
+     * 根据用户名获取用户信息
+     * @param id 文章id
+     * @return
+     */
+    @Override
+    public boolean deleteByArticleId(int id) {
+        try {
+            connection= C3P0Until.getConnection();
+            assert connection != null;
+            //声明预备语句（放在enum类中）
+            preparedStatement=connection.prepareStatement(MySql.DELETE_COMMENTS_BY_ARTICLE_ID.toString());
+            //设置文章id
+            preparedStatement.setInt(1,id);
+            //执行删除
+            preparedStatement.executeUpdate();
+            //返回结果
+            return true;
+        } catch (SQLException throwable) {
+            throwable.printStackTrace();
+        } finally {
+            C3P0Until.close(connection,preparedStatement,resultSet);
+        }
+        return false;
+    }
 
 
     /**

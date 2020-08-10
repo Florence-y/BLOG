@@ -31,4 +31,9 @@ public class CommentDaoImplTest {
         }
         System.out.println(b.getCommentOfArticle(2));
     }
+    @Test
+    public void delete(){
+        CommentDao b= new CommentDaoImpl();
+        b.deleteByArticleId(3);
+    }
 }
