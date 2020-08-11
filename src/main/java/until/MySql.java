@@ -14,24 +14,24 @@ public enum MySql {
             "password VARCHAR(50) NOT NULL,"+
             "sex VARCHAR(10) NOT NULL," +
             "face VARCHAR(50) NOT NULL"+
-            ")"),
+            ") CHARACTER SET utf8 COLLATE utf8_general_ci"),
     //文章表
     CREATE_TABLE_ARTICLE("CREATE TABLE IF NOT EXISTS articles  (" +
             "id INT PRIMARY KEY AUTO_INCREMENT," +
             "name VARCHAR(20) NOT NULL," +
             "content VARCHAR(1000) NOT NULL,"+
             "author VARCHAR(50) NOT NULL"+
-            ")"),
+            ") CHARACTER SET utf8 COLLATE utf8_general_ci"),
     //文章和分类的连接表
     CREATE_TABLE_SORT_LINK_ARTICLE("CREATE TABLE IF NOT EXISTS sortLinkArticle  (" +
             "articleId INT NOT NULL," +
             "sortId INT NOT NULL" +
-            ")"),
+            ") CHARACTER SET utf8 COLLATE utf8_general_ci"),
     //分类表
     CREATE_TABLE_SORT("CREATE TABLE IF NOT EXISTS sort  (" +
             "id INT PRIMARY KEY AUTO_INCREMENT," +
             "name VARCHAR(50) NOT NULL" +
-            ")"),
+            ") CHARACTER SET utf8 COLLATE utf8_general_ci"),
     //评论表
     CREATE_TABLE_COMMENT("CREATE TABLE IF NOT EXISTS comment ("+
             "id INT PRIMARY KEY AUTO_INCREMENT,"+
@@ -40,9 +40,9 @@ public enum MySql {
             "commentDate DATE NOT NULL,"+
             "agreeCount INT DEFAULT 0,"+
             "articleId INT NOT NULL"+
-            ")"),
+            ") CHARACTER SET utf8 COLLATE utf8_general_ci"),
     //建库语句
-    CREATE_DATABASE("CREATE DATABASE IF NOT EXISTS BLOG"),
+    CREATE_DATABASE("CREATE DATABASE IF NOT EXISTS BLOG DEFAULT CHARSET utf8 COLLATE utf8_general_ci"),
     //根据条件查询(模板)1:表名 2、3条件
     QUERY_ACTION("SELECT * FROM ? WHERE ? = ?"),
     //根据条件删除(模板) 1:表名 2、3条件

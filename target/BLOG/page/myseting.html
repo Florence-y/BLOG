@@ -96,6 +96,12 @@
                 $.post("../ChangePassWordServlet",{account:cookieAccount,nowPassWord:nowPassWord,wantToChangePassWord:wantToChangePassWord},function (data) {
                     if(data==="success"){
                         alert("修改成功！");
+                        //清空原密码
+                        $("#nowPassWord").val("");
+                        //清空改变的密码
+                        $("#wantToChangePassWord").val("");
+                        //清空重复的密码
+                        $("#repeatPassWord").val("");
                         return ;
                     }
                     alert("修改失败，请检查原密码是否输入正确（或者后端程序员写BUG啦-v-）");
@@ -572,12 +578,20 @@
                 $("#changePassWordShow").show();
                 $("#myDataShow").hide();
                 $("#deleteUserShow").hide();
+                //清空原密码
+                $("#nowPassWord").val("");
+                //清空改变的密码
+                $("#wantToChangePassWord").val("");
+                //清空重复的密码
+                $("#repeatPassWord").val("");
             });
             //注销用户
             $("#deleteUser").click(function () {
                 $("#deleteUserShow").show();
                 $("#myDataShow").hide();
                 $("#changePassWordShow").hide();
+                $("#deleteUserPassWord").val("");
+                $("#repeatDeleteUserPassWord").val("");
             });
             //下面是分类选择的逻辑，点击哪一个，哪一个就会被加到已经添加的标签后面。
             $("#tag1").click(function () {
@@ -709,33 +723,33 @@
             </div>
             <!--修改用户名和性别-->
             <div class="col-md-8" id="myDataShow">
-                    <div class="form-group col-md-5">
-                        <label for="changeName">用户名</label>
-                        <input type="text" class="form-control" id="changeName" placeholder="用户名">&nbsp;&nbsp;
-                        <span id="changeNameHelpInf"></span><br>
-                        <label for="sex">性别：</label>
-                        <label>
-                            <input type="radio" name="sexChoose" id="sex" value="男" checked="">男&nbsp;&nbsp;
-                            <input type="radio" name="sexChoose"  value="女" checked="">女
-                            &nbsp;&nbsp;<span id="nowSex"></span>
-                        </label><br>
-                        <button type="button" class="btn btn-primary" id="changeInfButton">修改</button>
-                    </div>
+                <div class="form-group col-md-5">
+                    <label for="changeName">用户名</label>
+                    <input type="text" class="form-control" id="changeName" placeholder="用户名">&nbsp;&nbsp;
+                    <span id="changeNameHelpInf"></span><br>
+                    <label for="sex">性别：</label>
+                    <label>
+                        <input type="radio" name="sexChoose" id="sex" value="男" checked="">男&nbsp;&nbsp;
+                        <input type="radio" name="sexChoose"  value="女" checked="">女
+                        &nbsp;&nbsp;<span id="nowSex"></span>
+                    </label><br>
+                    <button type="button" class="btn btn-primary" id="changeInfButton">修改</button>
+                </div>
             </div>
             <!--修改密码-->
             <div id="changePassWordShow">
-                    <div class="form-group col-md-5" >
-                        <label for="nowPassWord">原密码</label>
-                        <input type="password" class="form-control" id="nowPassWord" placeholder="输入原密码">
-                        <br>
-                        <label for="wantToChangePassWord">输入新密码</label>
-                        <input type="password" class="form-control" id="wantToChangePassWord" placeholder="20字符以内">
-                        <br>
-                        <label for="repeatPassWord">再次输入密码</label>
-                        <input type="password" class="form-control" id="repeatPassWord" placeholder="再次输入密码">
-                        <br>
-                        <button type="button" class="btn btn-info" id="changePassWordButton">修改</button>
-                    </div>
+                <div class="form-group col-md-5" >
+                    <label for="nowPassWord">原密码</label>
+                    <input type="password" class="form-control" id="nowPassWord" placeholder="输入原密码">
+                    <br>
+                    <label for="wantToChangePassWord">输入新密码</label>
+                    <input type="password" class="form-control" id="wantToChangePassWord" placeholder="20字符以内">
+                    <br>
+                    <label for="repeatPassWord">再次输入密码</label>
+                    <input type="password" class="form-control" id="repeatPassWord" placeholder="再次输入密码">
+                    <br>
+                    <button type="button" class="btn btn-info" id="changePassWordButton">修改</button>
+                </div>
             </div>
             <!--删除用户-->
             <div id="deleteUserShow">
