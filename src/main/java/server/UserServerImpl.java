@@ -10,6 +10,10 @@ import until.Md5Until;
  */
 public class UserServerImpl implements UserServer {
     /**
+     * 账号已经删除的标志
+     */
+    private static final String ALREADY_DELETE ="../img/userAlreadyDeleted.jpg";
+    /**
      * User用户数据库操作对象
      */
     UserDao dao;
@@ -58,7 +62,7 @@ public class UserServerImpl implements UserServer {
         dao = new UserDaoImpl();
         User myUser= dao.getUser(user.getAccount());
         //用户不存在
-        if(myUser==null){
+        if(myUser==null|| ALREADY_DELETE.equals(myUser.getFace())){
             return null;
         }
         //密码不相同
