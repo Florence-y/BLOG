@@ -6,7 +6,7 @@ import pojo.User;
  * @author Florence
  * 用户操作接口
  */
-public interface UserDao {
+public interface UserDao extends BaseDao<User> {
     /**
      * 添加用户方法
      * @param user 用户

@@ -1,9 +1,14 @@
 package dao;
+import dao.strategy.UserJdbcStrategy;
+import myinterface.BaseDao;
+import myinterface.JdbcGetPojoStrategy;
 import myinterface.UserDao;
 import pojo.User;
 import until.C3P0Until;
 import until.Md5Until;
 import until.MySql;
+import until.ReflectUtil;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,7 +18,7 @@ import java.sql.SQLException;
  * @author Florence
  * 用户数据库操作类
  */
-public class UserDaoImpl implements UserDao {
+public class UserDaoImpl extends BaseDaoImpl<User> implements UserDao  {
     Connection connection;
     PreparedStatement preparedStatement;
     ResultSet resultSet;
@@ -307,5 +312,20 @@ public class UserDaoImpl implements UserDao {
         }
         //获取用户对象失败
         return null;
+    }
+
+    @Override
+    public String getTableName() {
+        return "users";
+    }
+
+    @Override
+    public String getTableIdField() {
+        return ReflectUtil.getIdField(new User());
+    }
+
+    @Override
+    public JdbcGetPojoStrategy getStrategy() {
+        return new UserJdbcStrategy();
     }
 }

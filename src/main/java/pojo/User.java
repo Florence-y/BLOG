@@ -1,5 +1,9 @@
 package pojo;
 
+import annontation.DbCol;
+import annontation.DbPriKey;
+import jdk.nashorn.internal.objects.annotations.Property;
+
 /**
  * @author Florence
  * 用户实体类
@@ -8,6 +12,8 @@ public class User {
     /**
      * 用户id
      */
+    @DbCol("userId")
+    @DbPriKey
     private int id;
     /**
      * 用户名
