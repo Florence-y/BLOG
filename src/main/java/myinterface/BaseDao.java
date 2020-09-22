@@ -17,16 +17,18 @@ public interface BaseDao<T> {
     /**
      * 根据id更新
      * @param pojo 实体类对象
+     * @param value 可变参数
      * @return 返回在第几行影响
      */
-    int updateOneColById(T pojo);
+    int updateOneColById(T pojo,Object... value);
 
     /**
      * 插入一条数据
      * @param pojo 实体类对象
+     * @param value 可变参数
      * @return 影响在第几行
      */
-    int insertOneRow(T pojo);
+    int insertOneRow(T pojo,Object... value);
 
     /**
      * 根据id删除

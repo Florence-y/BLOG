@@ -1,6 +1,7 @@
 package dao;
 
 import myinterface.BaseDao;
+import myinterface.InsertStrategy;
 import myinterface.JdbcGetPojoStrategy;
 import until.JdbcUtil;
 import until.ReflectUtil;
@@ -9,7 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.MessageFormat;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -36,6 +36,11 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
      * @return
      */
     public abstract JdbcGetPojoStrategy getStrategy();
+
+    /**
+     *
+     */
+    public abstract InsertStrategy getInsertRowStrategy();
     /**
      * 根据id获取一个对象
      * @param id 要求的id
@@ -53,7 +58,8 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
      * @return 返回更新到几行
      */
     @Override
-    public int updateOneColById(T pojo) {
+    public int updateOneColById(T pojo,Object... value) {
+        String sql =MessageFormat.format("UPDATE {0} SET {1}={2} WHERE {3} )","s");
         return 0;
     }
 
@@ -63,8 +69,14 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
      * @return 影响到第几行
      */
     @Override
-    public int insertOneRow(T pojo) {
-        return 0;
+    public int insertOneRow(T pojo,Object... value) {
+        String unKnowParameter="";
+        for (int i=0;i<value.length-1;i++){
+            unKnowParameter+="?,";
+        }
+        unKnowParameter+="?";
+        String sql =MessageFormat.format("INSERT INTO "+getTableName()+" VALUES ("+unKnowParameter+")",value);
+        return JdbcUtil.insertOneRow(sql,getInsertRowStrategy(),value);
     }
 
     /**

@@ -1,6 +1,8 @@
 package dao;
+import dao.strategy.UserInsertStrategy;
 import dao.strategy.UserJdbcStrategy;
 import myinterface.BaseDao;
+import myinterface.InsertStrategy;
 import myinterface.JdbcGetPojoStrategy;
 import myinterface.UserDao;
 import pojo.User;
@@ -327,5 +329,10 @@ public class UserDaoImpl extends BaseDaoImpl<User> implements UserDao  {
     @Override
     public JdbcGetPojoStrategy getStrategy() {
         return new UserJdbcStrategy();
+    }
+
+    @Override
+    public InsertStrategy getInsertRowStrategy() {
+        return new UserInsertStrategy();
     }
 }

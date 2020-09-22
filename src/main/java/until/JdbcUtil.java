@@ -1,5 +1,6 @@
 package until;
 
+import myinterface.InsertStrategy;
 import myinterface.JdbcGetPojoStrategy;
 
 import java.sql.Connection;
@@ -76,4 +77,17 @@ public class JdbcUtil {
         return 0;
     }
 
+    public static int insertOneRow(String sql, InsertStrategy pojoStrategy, Object[] value) {
+        try {
+            connection=C3P0Until.getConnection();
+            preparedStatement=connection.prepareStatement(sql);
+            pojoStrategy.strategy(value,preparedStatement);
+            return preparedStatement.executeUpdate();
+        } catch (SQLException throwable) {
+            throwable.printStackTrace();
+        } finally {
+            C3P0Until.close(connection,preparedStatement);
+        }
+        return -1;
+    }
 }

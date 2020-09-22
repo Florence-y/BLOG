@@ -56,4 +56,15 @@ public class UserDaoImplTest {
         UserDao a = new UserDaoImpl() ;
         a.changeOneByOneCondition("11111","face","../img/initFace.jpg");
     }
+
+    @Test
+    public void getAll(){
+        UserDao a =new UserDaoImpl();
+        System.out.println(a.getAllRow());
+    }
+    @Test
+    public void common(){
+        UserDao a = new UserDaoImpl();
+        a.insertOneRow(new User(),0,"sss","13144455","dadadadad","女","www.baidu.com");
+    }
 }

@@ -22,7 +22,6 @@ public class JdbcTemplateTest {
     @Test
     public void baseDao(){
         BaseDao dao = new UserDaoImpl();
-        User user = (User) dao.selectById(1);
-        System.out.println(user);
+        dao.insertOneRow(new User(),-1,"2213576512","www","123456","男","../dadad/wwafafa");
     }
 }
