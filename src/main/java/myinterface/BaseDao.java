@@ -32,11 +32,10 @@ public interface BaseDao<T> {
 
     /**
      * 根据id删除
-     * @param pojo
      * @param id id
      * @return 返回值
      */
-    int deleteById(T pojo,int id);
+    int deleteById(int id);
 
     /**
      * 获取全部数据

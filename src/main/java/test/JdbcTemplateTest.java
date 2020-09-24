@@ -21,7 +21,6 @@ public class JdbcTemplateTest {
     }
     @Test
     public void baseDao(){
-        BaseDao dao = new UserDaoImpl();
-        dao.insertOneRow(new User(),-1,"2213576512","www","123456","男","../dadad/wwafafa");
+        JdbcUtil.executeSqlByPrepareStatement("delete from users where acount=","sss");
     }
 }

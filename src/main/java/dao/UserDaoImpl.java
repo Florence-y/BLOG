@@ -327,7 +327,7 @@ public class UserDaoImpl extends BaseDaoImpl<User> implements UserDao  {
     }
 
     @Override
-    public JdbcGetPojoStrategy getStrategy() {
+    public JdbcGetPojoStrategy getPackageStrategy() {
         return new UserJdbcStrategy();
     }
 

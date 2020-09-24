@@ -35,10 +35,11 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
      * 获取相应的jdbc策略
      * @return
      */
-    public abstract JdbcGetPojoStrategy getStrategy();
+    public abstract JdbcGetPojoStrategy getPackageStrategy();
 
     /**
-     *
+     * 获取插入行的策略
+     * @return
      */
     public abstract InsertStrategy getInsertRowStrategy();
     /**
@@ -49,17 +50,21 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
     @Override
     public T selectById(int id) {
         String sql = MessageFormat.format("select * from {0} where {1} = {3}",getTableName(),getTableIdField(),id);
-        return JdbcUtil.queryForJavaBean(sql,getStrategy());
+        return JdbcUtil.queryForJavaBean(sql,getPackageStrategy());
     }
 
     /**
      * 根据id更新一个对象
      * @param pojo 实体类对象
      * @return 返回更新到几行
-     */
+     */  
     @Override
     public int updateOneColById(T pojo,Object... value) {
-        String sql =MessageFormat.format("UPDATE {0} SET {1}={2} WHERE {3} )","s");
+        for (int i=0;i<value.length;i+=2) {
+            String sql = "update " + getTableName() + " set " + value[i]+"="+'?';
+
+        }
+//        preparedStatement.setString();
         return 0;
     }
 
@@ -70,11 +75,11 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
      */
     @Override
     public int insertOneRow(T pojo,Object... value) {
-        String unKnowParameter="";
+        StringBuilder unKnowParameter= new StringBuilder();
         for (int i=0;i<value.length-1;i++){
-            unKnowParameter+="?,";
+            unKnowParameter.append("?,");
         }
-        unKnowParameter+="?";
+        unKnowParameter.append("?");
         String sql =MessageFormat.format("INSERT INTO "+getTableName()+" VALUES ("+unKnowParameter+")",value);
         return JdbcUtil.insertOneRow(sql,getInsertRowStrategy(),value);
     }
@@ -85,15 +90,15 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
      * @return
      */
     @Override
-    public int deleteById(T pojo,int id) {
-        String sql= MessageFormat.format("DELETE FROM {0} WHERE {1} = {2}",getTableName(), ReflectUtil.getIdField(pojo),id);
+    public int deleteById(int id) {
+        String sql= MessageFormat.format("DELETE FROM {0} WHERE {1} = {2}",getTableName(),getTableIdField(),id);
         return JdbcUtil.executeSql(sql);
     }
 
     @Override
     public List<T> getAllRow(){
         String sql =MessageFormat.format("select * from {0}",getTableName());
-        List<T> resultList =JdbcUtil.queryForJavaBeanAllData(sql,getStrategy());
+        List<T> resultList =JdbcUtil.queryForJavaBeanAllData(sql,getPackageStrategy());
         return resultList;
     }
 }

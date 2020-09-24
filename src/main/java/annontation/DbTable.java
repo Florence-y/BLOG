@@ -10,5 +10,5 @@ import java.lang.annotation.*;
 @Inherited
 @Documented
 public @interface DbTable {
-    String tableName();
+    String value();
 }

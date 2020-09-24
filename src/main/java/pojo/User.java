@@ -12,28 +12,33 @@ public class User {
     /**
      * 用户id
      */
-    @DbCol("userId")
+    @DbCol("id")
     @DbPriKey
     private int id;
     /**
      * 用户名
      */
+    @DbCol("name")
     private String name;
     /**
      * 用户账号
      */
+    @DbCol("account")
     private String account;
     /**
      * 用户密码
      */
+    @DbCol("password")
     private String password;
     /**
      * 用户性别
      */
+    @DbCol("sex")
     private String sex;
     /**
      * 用户头像
      */
+    @DbCol("face")
     private String face;
 
     public User(int id, String name, String password, String sex, String face) {
