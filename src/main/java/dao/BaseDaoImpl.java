@@ -3,6 +3,8 @@ package dao;
 import myinterface.BaseDao;
 import myinterface.InsertStrategy;
 import myinterface.JdbcGetPojoStrategy;
+import until.ArrayUtil;
+import until.C3P0Until;
 import until.JdbcUtil;
 import until.ReflectUtil;
 
@@ -12,6 +14,8 @@ import java.sql.ResultSet;
 import java.text.MessageFormat;
 import java.util.List;
 
+import static until.ArrayUtil.getArrByOddOrEven;
+
 /**
  * @author Florence
  */
@@ -19,6 +23,7 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
     Connection connection;
     PreparedStatement preparedStatement;
     ResultSet resultSet;
+    private static final int two=2;
     /**
      * 获取 T 表的名字
      * @return 数据库表的名字
@@ -54,17 +59,22 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
     }
 
     /**
-     * 根据id更新一个对象
+     * 根据最后一个条件更新一些
+     * 函数的用法 key value key value key value （condition） key value
      * @param pojo 实体类对象
      * @return 返回更新到几行
-     */  
+     */
     @Override
-    public int updateOneColById(T pojo,Object... value) {
-        for (int i=0;i<value.length;i+=2) {
-            String sql = "update " + getTableName() + " set " + value[i]+"="+'?';
-
+    public int updateColByOneCondition(T pojo,Object... value) {
+        try {
+            if (value.length%two!=0){
+                throw new Exception("参数长度有问题");
+            }
+            //先利用反射拼接语句，然后根据参数设置
+            return JdbcUtil.update(ReflectUtil.getUpdateSql(pojo,getArrByOddOrEven(value, ArrayUtil.odd)),getArrByOddOrEven(value,ArrayUtil.even));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-//        preparedStatement.setString();
         return 0;
     }
 
@@ -100,5 +110,25 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
         String sql =MessageFormat.format("select * from {0}",getTableName());
         List<T> resultList =JdbcUtil.queryForJavaBeanAllData(sql,getPackageStrategy());
         return resultList;
+    }
+
+    @Override
+    public boolean isExistQueryBySomeCondition(Object... keyAndValue) {
+        try {
+            if (keyAndValue.length!=2){
+                throw new Exception("可变参数输入异常");
+            }
+            connection=C3P0Until.getConnection();
+            String sql="SELECT * FROM "+getTableName()+" WHERE "+keyAndValue[0]+" = ? limit 1";
+            resultSet=JdbcUtil.queryForGetResultSet(connection,sql,keyAndValue[1]);
+            if (resultSet.next()){
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            C3P0Until.close(connection,resultSet);
+        }
+        return false;
     }
 }

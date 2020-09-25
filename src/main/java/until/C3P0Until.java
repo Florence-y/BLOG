@@ -146,6 +146,31 @@ public class C3P0Until {
         }
     }
 
+    public static void close(ResultSet rs) {
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException e) {
+                System.out.println("ResultSet数据库资源解放失败");
+            }
+        }
+    }
+    public static void close(Connection conn,ResultSet rs) {
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException e) {
+                System.out.println("ResultSet数据库资源解放失败");
+            }
+        }
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                System.out.println("PreparedStatement数据库资源解放失败");
+            }
+        }
+    }
 
     /*-***************************************************************************
     public static void main(String[] args) throws SQLException {

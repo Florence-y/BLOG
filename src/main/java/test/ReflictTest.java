@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 public class ReflictTest {
     @Test
     public void getIDFile(){
-        System.out.println(ReflectUtil.getIdField(new User()));
+        ReflectUtil.getUpdateSql(new User(),new String[]{"name","account","id"});
     }
 }

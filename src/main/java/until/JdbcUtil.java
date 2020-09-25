@@ -77,7 +77,20 @@ public class JdbcUtil {
             throwables.printStackTrace();
         }
     }
-
+    public static int update(String sql,Object... value){
+        try {
+            connection=C3P0Until.getConnection();
+            assert connection != null;
+            preparedStatement=connection.prepareStatement(sql);
+            setPrepareStatementUnknown(preparedStatement,value);
+            return preparedStatement.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            C3P0Until.close(connection,preparedStatement);
+        }
+        return -1;
+    }
     /**
      *
      * @param sql sql语句
@@ -132,9 +145,9 @@ public class JdbcUtil {
      * @param value 值
      * @return 返回获取到的结果集
      */
-    public static ResultSet queryForGetResultSet(String sql,Object... value){
+    public static ResultSet queryForGetResultSet(Connection con,String sql,Object... value){
         try {
-            connection=C3P0Until.getConnection();
+            connection=con;
             assert connection != null;
             preparedStatement=connection.prepareStatement(sql);
             setPrepareStatementUnknown(preparedStatement,value);
@@ -142,8 +155,6 @@ public class JdbcUtil {
             return resultSet;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        } finally {
-            C3P0Until.close(connection,preparedStatement,resultSet);
         }
         return null;
     }
@@ -157,11 +168,19 @@ public class JdbcUtil {
      */
     public static int insertOneRow(String sql, InsertStrategy pojoStrategy, Object[] value) {
         try {
+            int nowArticleId=0;
             connection=C3P0Until.getConnection();
             assert connection != null;
-            preparedStatement=connection.prepareStatement(sql);
+            preparedStatement=connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
             pojoStrategy.strategy(value,preparedStatement);
-            return preparedStatement.executeUpdate();
+            preparedStatement.executeUpdate();
+            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+            //获取刚插入的对象ID
+            if(generatedKeys.next()){
+                nowArticleId=generatedKeys.getInt(1);
+            }
+            System.out.println(nowArticleId);
+            return nowArticleId;
         } catch (SQLException throwable) {
             throwable.printStackTrace();
         } finally {

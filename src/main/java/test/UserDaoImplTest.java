@@ -65,6 +65,7 @@ public class UserDaoImplTest {
     @Test
     public void common(){
         UserDao a = new UserDaoImpl();
-        a.insertOneRow(new User(),0,"sss","13144455","dadadadad","女","www.baidu.com");
+        int i=a.insertOneRow(new User(),0,"aaa","bbb","ccc","sss","ddd");
+        System.out.println();
     }
 }

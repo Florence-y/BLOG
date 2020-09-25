@@ -21,6 +21,6 @@ public class JdbcTemplateTest {
     }
     @Test
     public void baseDao(){
-        JdbcUtil.executeSqlByPrepareStatement("delete from users where acount=","sss");
+
     }
 }
