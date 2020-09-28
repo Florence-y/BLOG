@@ -10,9 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author DELL
  */
-@ServerEndpoint("/WebSocket/{username}")
+@ServerEndpoint("/WebSocket/{username}/{toSomeOne}")
 public class ChatServer {
     private static Map<String,ChatServer> clients = new ConcurrentHashMap<>();
+    String name;
     /**
      * 与某个客户端的连接会话，需要通过它来给客户端发送数据
      *
@@ -26,21 +27,22 @@ public class ChatServer {
      *            可选的参数。session为与某个客户端的连接会话，需要通过它来给客户端发送数据
      */
     @OnOpen
-    public void onOpen(@PathParam(value="username") String userId, Session session) {
-        System.out.println(userId);
+    public void onOpen(@PathParam(value="username") String userName, Session session) {
+        name=userName;
+        System.out.println(userName);
         this.session = session;
         //加入map中
-        clients.put(userId, this);
-        System.out.println(userId+"连接加入！当前在线人数为" + getOnlineCount());
+        clients.put(userName, this);
+        System.out.println(userName+"连接加入！当前在线人数为" + getOnlineCount());
     }
 
     /**
      * 连接关闭调用的方法
      */
     @OnClose
-    public void onClose(@PathParam(value="username") String userId) {
-        clients.remove(userId);
-        System.out.println(userId+"关闭连接！当前在线人数为" + getOnlineCount());
+    public void onClose(@PathParam(value="username") String userName) {
+        clients.remove(userName);
+        System.out.println(userName+"关闭连接！当前在线人数为" + getOnlineCount());
     }
 
     /**
@@ -52,11 +54,14 @@ public class ChatServer {
      *            可选的参数
      */
     @OnMessage
-    public void onMessage(@PathParam(value="username") String userId, String message, Session session) {
-        System.out.println("来自客户端"+userId+"的消息:" + message);
-
-        // 群发消息
+    public void onMessage(@PathParam(value="username") String userId, @PathParam(value = "toSomeOne") String someone,String message, Session session) {
+        System.out.println("来自客户端"+userId+"发送给"+someone+"的消息:" + message);
+        //群发消息
         for (Map.Entry<String,ChatServer> entry : clients.entrySet()) {
+            //没找到合适的
+            if (!entry.getKey().equals(someone)){
+                continue;
+            }
             ChatServer item = entry.getValue();
             try {
                 item.sendMessage(message);
@@ -73,8 +78,8 @@ public class ChatServer {
      * @param error
      */
     @OnError
-    public void onError(@PathParam(value="userId") String userId, Session session, Throwable error) {
-        System.out.println(userId+"发生错误");
+    public void onError(@PathParam(value="userId") String userName, Session session, Throwable error) {
+        System.out.println(userName+"发生错误");
         error.printStackTrace();
     }
 
@@ -85,8 +90,8 @@ public class ChatServer {
      * @throws IOException
      */
     public void sendMessage(String message) throws IOException {
-        this.session.getBasicRemote().sendText(message);
-        // this.session.getAsyncRemote().sendText(message);
+//        this.session.getBasicRemote().sendText(message);
+         this.session.getAsyncRemote().sendText(message);
     }
 
     public static synchronized int getOnlineCount() {
