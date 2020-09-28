@@ -1,5 +1,4 @@
 package dao;
-
 import myinterface.BaseDao;
 import myinterface.InsertStrategy;
 import myinterface.JdbcGetPojoStrategy;
@@ -7,13 +6,11 @@ import until.ArrayUtil;
 import until.C3P0Until;
 import until.JdbcUtil;
 import until.ReflectUtil;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.MessageFormat;
 import java.util.List;
-
 import static until.ArrayUtil.getArrByOddOrEven;
 
 /**
@@ -105,6 +102,10 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
         return JdbcUtil.executeSql(sql);
     }
 
+    /**
+     * 获取全部的行
+     * @return
+     */
     @Override
     public List<T> getAllRow(){
         String sql =MessageFormat.format("select * from {0}",getTableName());
@@ -112,6 +113,11 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
         return resultList;
     }
 
+    /**
+     *
+     * @param keyAndValue 键值对
+     * @return 只有两个条件
+     */
     @Override
     public boolean isExistQueryBySomeCondition(Object... keyAndValue) {
         try {

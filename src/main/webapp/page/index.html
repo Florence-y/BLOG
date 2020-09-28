@@ -17,10 +17,20 @@
     <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
     <script src="../js/bootstrap.min.js"></script>
     <script>
+        let ws;
         $(function () {
-
+            if ('WebSocket' in window) {
+                alert("成功")
+                ws = new WebSocket("ws://localhost:8080/BLOG/WebSocket");
+            }
+            else {
+                alert("连接失败")
+            }
+            ws.onopen=function () {
+                alert("连接成功");
+            }
+            ws.send("aaaa");
         })
-        alert(a);
     </script>
 </head>
 <body style="background: #e2e2e2 url(../img/home.jpg) no-repeat fixed center;

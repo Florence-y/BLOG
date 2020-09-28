@@ -104,6 +104,16 @@
       <artifactId>elasticsearch-rest-high-level-client</artifactId>
       <version>7.9.1</version>
     </dependency>
+    <dependency>
+      <groupId>javax.websocket</groupId>
+      <artifactId>javax.websocket-api</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.websocket</groupId>
+      <artifactId>javax.websocket-client-api</artifactId>
+      <version>1.1</version>
+    </dependency>
   </dependencies>
 
   <build>

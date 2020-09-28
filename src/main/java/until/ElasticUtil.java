@@ -105,7 +105,6 @@ public class ElasticUtil {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(rangeQueryBuilder);
         searchSourceBuilder.size(length);
-
         return listSearchResult(searchSourceBuilder);
     }
     /**
