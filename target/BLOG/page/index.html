@@ -17,10 +17,30 @@
     <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
     <script src="../js/bootstrap.min.js"></script>
     <script>
+        let ws;
         $(function () {
-
+            if ('WebSocket' in window) {
+                //测试一定要加上虚拟路径，如果后面有参数+参数一定要相同
+                let username="abc";
+                // ws = new WebSocket("ws://localhost:8080/BLOG/WebSocket/"+username+'/abc');
+            }
+            else {
+                alert("连接失败")
+            }
+            ws.onopen=function () {
+                alert("连接成功");
+            }
+            ws.onmessage=function () {
+                alert("发送信息成功");
+            }
+            ws.onerror=function(){
+                alert("error");
+            }
+            // $("#E").click(function () {
+            //     ws.send("aaaa");
+            // })
         })
-        alert(a);
+
     </script>
 </head>
 <body style="background: #e2e2e2 url(../img/home.jpg) no-repeat fixed center;

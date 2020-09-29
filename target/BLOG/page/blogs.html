@@ -26,6 +26,7 @@
         //获取cookie信息（是否登录的验证）
         let cookieLogin=$.cookie("login");
         let cookieAccount=$.cookie("account");
+        let ws;
         //当前页码
         let pageNow;
         //页面展示状态 三种：（博文总览，分类查看，搜索查看），主要用于分页按钮的控制，什么这个值对应着调用什么服务
